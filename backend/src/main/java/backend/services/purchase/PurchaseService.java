@@ -103,6 +103,14 @@ public class PurchaseService {
         return PurchaseMapperService.toDtoList(purchases);
     }
 
+    public List<PurchaseDto> getPurchasesByPurchaserPending(Long purchaserId) {
+        // Ensure purchaser exists and is not an admin; resolveService.resolveUser will throw if invalid
+        resolveService.resolveUser(purchaserId);
+        List<Purchase> purchases = purchaseRepository.findByPurchaserIdAndIsConfirmedFalse(purchaserId);
+
+        return PurchaseMapperService.toDtoList(purchases);
+    }
+
     public PurchaseDto setPurchase(PurchaseDto purchaseDto) {
         Purchase purchase = purchaseRepository.findById(purchaseDto.id())
             .orElseThrow(() -> new EntityNotFoundException("Purchase not found with id " + purchaseDto.id()));

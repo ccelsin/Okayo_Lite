@@ -106,10 +106,21 @@ public class PurchaseController {
         List<PurchaseDto> purchases = purchaseService.getPurchasesByPurchaser(id);
         return ResponseEntity.ok(purchases);
     }
+
+    @GetMapping("/{id}/customer/pending")
+    public ResponseEntity<?> getPurchaseOfPurchaserPending(@PathVariable Long id, HttpServletRequest request) {
+        
+        if (userService.isAdmin (request) == false) {
+            return ResponseUtils.unauthorized("Access denied");
+        }
+
+        List<PurchaseDto> purchases = purchaseService.getPurchasesByPurchaserPending(id);
+        return ResponseEntity.ok(purchases);
+    }
     
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity<?> setPurchase(HttpServletRequest request, @RequestBody PurchaseDto purchaseDto) {
 
         if (userService.isAdmin(request) == false) {

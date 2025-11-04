@@ -11,4 +11,6 @@ import backend.models.Purchase;
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     List<Purchase> findByPurchaserId(Long purchaserId);
     List<Purchase> findByIsConfirmedFalse();
+    List<Purchase> findByPurchaserIdAndIsConfirmedFalse(Long purchaserId);
+    
 }

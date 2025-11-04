@@ -65,7 +65,7 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping
     public ResponseEntity<?> setProduct(HttpServletRequest request, @RequestBody ProductDto productDto) {
-        if (userService.isAuthorized(request) == false) {
+        if (userService.isAdmin(request) == false) {
             return ResponseUtils.unauthorized("Access denied");
         }
 

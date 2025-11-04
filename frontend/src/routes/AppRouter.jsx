@@ -6,6 +6,7 @@ import DashboardPage from "../pages/DashboardPage";
 import ProductsPage from "../pages/ProductsPage";
 import PurchasesPage from "../pages/PurchasesPage";
 import InvoicesPage from "../pages/InvoicesPage";
+import InvoiceCreateAssignPage from "../pages/InvoiceCreateAssignPage";
 import MyPurchasesPage from "../pages/MyPurchasesPage";
 import PaymentDetailsPage from "../pages/PaymentDetailsPage";
 import TvaPage from "../pages/TvaPage";
@@ -90,6 +91,11 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
+        <Route path="/invoices/new" 
+        element={<ProtectedRoute>
+                    <InvoiceCreateAssignPage />
+                  </ProtectedRoute>} />
+
       </Routes>
     </BrowserRouter>
   );

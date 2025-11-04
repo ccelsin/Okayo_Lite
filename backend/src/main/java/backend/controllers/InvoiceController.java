@@ -102,6 +102,19 @@ public class InvoiceController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/mine")
+    public ResponseEntity<?> getInvoiceOfCustomer(HttpServletRequest request, @PathVariable Long id) {
+        if (userService.isAuthorized(request) == false) {
+            return ResponseUtils.unauthorized("Access denied");
+        }
+        InvoiceDto invoice = invoiceService.getInvoice(id);
+        if (invoice == null) {
+            return ResponseUtils.notFound("Invoice not found with id " + id);
+        }
+        return ResponseEntity.ok(invoice);
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     public ResponseEntity<?> setInvoice(HttpServletRequest request, @PathVariable Long id, @RequestBody InvoiceUpdateRequest invoiceUpdateRequest) {
         if (userService.isAdmin(request) == false) {

@@ -10,6 +10,16 @@ export async function listPurchases() {
   return data;
 }
 
+export async function listPurchasesByCustomer(customerId) {
+  const { data } = await client.get(`/api/purchase/${customerId}/customer`);
+  return data;
+}
+
+export async function listPurchasesByCustomerPending(customerId) {
+  const { data } = await client.get(`/api/purchase/${customerId}/customer/pending`);
+  return data;
+}
+
 export async function listMyPurchases() {
   const { data } = await client.get("/api/purchase/mine");
   return data;
