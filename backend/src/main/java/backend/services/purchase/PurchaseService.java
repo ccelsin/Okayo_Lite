@@ -122,7 +122,7 @@ public class PurchaseService {
         Product product = purchaseDto.productId() != null ? resolveService.resolveProduct(purchaseDto.productId()) : null;
         Invoice invoice = purchaseDto.invoiceId() != null ? resolveService.resolveInvoice(purchaseDto.invoiceId()) : null;
         User purchaser = purchaseDto.purchaserId() != null ? resolveService.resolveUser(purchaseDto.purchaserId()) : null;
-        if (invoice.isConfirmed()) {
+        if (invoice!= null && invoice.isConfirmed()) {
             throw new IllegalStateException("Confirmed purchases cannot be modified");
         }
         purchase.setInvoice(invoice);

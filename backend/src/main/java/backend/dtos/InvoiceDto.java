@@ -14,6 +14,7 @@ public record InvoiceDto(
     Long customerId,
     Long creatorId,
     Long paymentDetailsId,
-    List<Long> purchaseIds
+    List<Long> purchaseIds,
+    boolean isConfirmed
 ) {
 }

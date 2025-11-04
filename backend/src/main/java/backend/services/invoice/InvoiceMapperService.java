@@ -18,6 +18,7 @@ public class InvoiceMapperService {
         Long customerId = invoice.getCustomer() != null ? invoice.getCustomer().getId() : null;
         Long creatorId = invoice.getCreator() != null ? invoice.getCreator().getId() : null;
         Long paymentDetailsId = invoice.getPaymentDetails() != null ? invoice.getPaymentDetails().getId() : null;
+        Boolean isConfirmed = Boolean.valueOf(invoice.isConfirmed());
 
         List<Long> purchaseIds = new ArrayList<>();
         if (invoice.getPurchases() != null) {
@@ -38,7 +39,8 @@ public class InvoiceMapperService {
             customerId,
             creatorId,
             paymentDetailsId,
-            purchaseIds
+            purchaseIds,
+            isConfirmed
         );
     }
 

@@ -103,13 +103,14 @@ public class InvoiceController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/mine")
-    public ResponseEntity<?> getInvoiceOfCustomer(HttpServletRequest request, @PathVariable Long id) {
+    public ResponseEntity<?> getInvoicesOfCustomer(HttpServletRequest request) {
         if (userService.isAuthorized(request) == false) {
             return ResponseUtils.unauthorized("Access denied");
         }
-        InvoiceDto invoice = invoiceService.getInvoice(id);
+        Long customerId = userService.extractUserIdFromRequest(request);
+        List<InvoiceDto> invoice = invoiceService.getInvoicesOfCustomer(customerId);
         if (invoice == null) {
-            return ResponseUtils.notFound("Invoice not found with id " + id);
+            return ResponseUtils.notFound("Invoice not found  ");
         }
         return ResponseEntity.ok(invoice);
     }

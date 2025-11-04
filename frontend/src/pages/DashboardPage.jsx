@@ -30,6 +30,14 @@ const shortcuts = [
     title: "Articles",
     description: "Consultez les Offres Okayo et commandez",
     to: "/shop"
+  },{
+    title: "Mes factures",
+    description: "Consultez vos différentes factures",
+    to: "/my-invoices"
+  },{
+    title: "Factures",
+    description: "Gérer les différentes factures des clients",
+    to: "/invoices"
   }
 ];
 

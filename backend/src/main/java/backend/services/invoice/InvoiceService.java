@@ -19,6 +19,7 @@ import backend.models.User;
 import backend.repositories.InvoiceRepository;
 import backend.repositories.PurchaseRepository;
 import backend.services.ResolveService;
+import backend.utilities.BeanCopyUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -99,7 +100,22 @@ public class InvoiceService {
     }
 
     public List<InvoiceDto> getAllInvoices() {
-        List<Invoice> invoices = invoiceRepository.findAll();
+    List<Invoice> invoices = invoiceRepository.findAll();
+
+    // Update invoice not confirmed
+    for (Invoice invoice : invoices) {
+        if(invoice.isConfirmed() == false){
+            updateInvoiceTotals(invoice);
+        }
+        updateInvoiceTotals(invoice);
+    }
+
+    // Convertit en DTOs
+    return InvoiceMapperService.toDtoList(invoices);
+}
+
+    public List<InvoiceDto> getInvoicesOfCustomer(Long id) {
+        List<Invoice> invoices = invoiceRepository.findByCustomerIdAndIsConfirmedTrue(id);
         return InvoiceMapperService.toDtoList(invoices);
     }
 
@@ -110,8 +126,9 @@ public class InvoiceService {
         // Confirm every purchase
             if (invoice.getPurchases() != null && !invoice.getPurchases().isEmpty()) {
                 invoice.getPurchases().forEach(p -> p.setConfirmed(true));
-                // Sauvegarde explicitement les achats
+                // Save the purchase
                 purchaseRepository.saveAll(invoice.getPurchases());
+                BeanCopyUtils.copyNonNullProperties(invoiceUpdateRequest, invoice);
                 Invoice savedInvoice = invoiceRepository.save(invoice);
                 return InvoiceMapperService.toDto(savedInvoice);
             }

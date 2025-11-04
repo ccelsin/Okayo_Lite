@@ -12,6 +12,8 @@ import PaymentDetailsPage from "../pages/PaymentDetailsPage";
 import TvaPage from "../pages/TvaPage";
 import ProfilePage from "../pages/ProfilePage";
 import ShoppingPage from "../pages/ShoppingPage";
+import MyInvoices from "../pages/MyInvoices";
+import InvoiceEdit from "../pages/InvoiceEdit";
 
 export default function AppRouter() {
   return (
@@ -91,10 +93,25 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
-        <Route path="/invoices/new" 
-        element={<ProtectedRoute>
+        <Route 
+          path="/invoices/new" 
+          element={<ProtectedRoute>
                     <InvoiceCreateAssignPage />
                   </ProtectedRoute>} />
+
+        <Route 
+          path="/my-invoices" 
+          element={<ProtectedRoute>
+                    <MyInvoices />
+                  </ProtectedRoute>} />
+
+        <Route 
+          path="/invoices/:id/edit" 
+          element={<ProtectedRoute>
+                    <InvoiceEdit />
+                  </ProtectedRoute>} />
+        
+        
 
       </Routes>
     </BrowserRouter>
