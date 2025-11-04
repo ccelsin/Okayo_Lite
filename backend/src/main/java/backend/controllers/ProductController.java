@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.dtos.ProductDto;
-import backend.services.ProductService;
-import backend.services.UserService;
-
+import backend.services.product.ProductService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

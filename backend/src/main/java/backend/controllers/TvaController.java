@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.dtos.TvaDto;
-import backend.repositories.UserRepository;
-import backend.services.TvaService;
-import backend.services.UserService;
+import backend.services.tva.TvaService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 public class TvaController {
 
     private final TvaService tvaService;
-    private final UserRepository userRepository;
     private final UserService userService;
 
     @SecurityRequirement(name = "bearerAuth")

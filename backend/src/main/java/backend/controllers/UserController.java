@@ -10,15 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import backend.configuration.JwtUtils;
 import backend.utilities.ResponseUtils;
 
 import backend.dtos.UserDto;
 import backend.models.User;
 import backend.repositories.UserRepository;
-import backend.services.UserMapperService;
-import backend.services.UserService;
-
+import backend.services.user.UserMapperService;
+import backend.services.user.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +28,6 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
-
-    private final JwtUtils jwtUtil;
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/profile")

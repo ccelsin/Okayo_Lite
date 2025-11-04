@@ -1,4 +1,4 @@
-package backend.services;
+package backend.services.paymentdetails;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,6 @@ public class PaymentDetailsService {
 
     private final PaymentDetailsRepository paymentDetailsRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
 
     // Save new payment details for a user.
     public PaymentDetailsDto savePaymentDetails(Long userId, PaymentDetailsRequest paymentDetailsRequest) {
@@ -68,13 +67,5 @@ public class PaymentDetailsService {
         return PaymentDetailsMapperService.toDto(savedPaymentDetails);
     }
 
-    // Find the user required by payment details.
-    private User resolveUser(Long userId) {
-        if (userId == null) {
-            throw new EntityNotFoundException("User reference is required for payment details");
-        }
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User " + userId + " not found"));
-    }
     
 }   

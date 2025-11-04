@@ -1,4 +1,4 @@
-package backend.services;
+package backend.services.product;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import backend.dtos.ProductDto;
 import backend.models.Product;
 import backend.models.Tva;
 import backend.repositories.ProductRepository;
-import backend.repositories.TvaRepository;
+import backend.services.ResolveService;
 import backend.utilities.BeanCopyUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final TvaRepository tvaRepository;
     private final ResolveService resolveService;
     
 

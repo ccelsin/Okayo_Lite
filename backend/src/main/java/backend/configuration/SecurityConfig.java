@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import backend.filter.JwtFilter;
-import backend.services.CustomUserDetailsService;
+import backend.services.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 
 @Configuration

@@ -49,5 +49,8 @@ public class Invoice {
     @JoinColumn(name = "payment_details_id", nullable = false)
     private PaymentDetails paymentDetails;
 
+    @Column(nullable = false)
+    private boolean isConfirmed = false;
+
     
 }

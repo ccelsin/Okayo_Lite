@@ -1,4 +1,4 @@
-package backend.services;
+package backend.services.purchase;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,11 +13,12 @@ import backend.models.Product;
 import backend.models.Purchase;
 import backend.models.Tva;
 import backend.models.User;
-import backend.repositories.InvoiceRepository;
-import backend.repositories.ProductRepository;
 import backend.repositories.PurchaseRepository;
-import backend.repositories.UserRepository;
+import backend.services.ResolveService;
+import backend.services.invoice.InvoiceService;
+import backend.services.product.ProductMapperService;
 import backend.utilities.BeanCopyUtils;
+import backend.utilities.ResponseUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -26,10 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-    private final ProductRepository productRepository;
-    private final InvoiceRepository invoiceRepository;
-    private final UserRepository userRepository;
     private final ResolveService resolveService;
+    private final InvoiceService invoiceService;
 
 
     public PurchaseDto savePurchase(PurchaseDto purchaseDto) {
@@ -51,7 +50,7 @@ public class PurchaseService {
             product.getUnitPriceHT(),
             getTotalHT(purchaseDto.quantity(),product.getUnitPriceHT()),
             tva.getDefaultRate(),
-            getTotalTVA(product.getUnitPriceHT(),tva.getDefaultRate()),
+            getTotalTVA(getTotalHT(purchaseDto.quantity(),product.getUnitPriceHT()),tva.getDefaultRate()),
             invoice != null ? invoice.getId() : null,
             purchaseDto.purchaserId(),
             Boolean.FALSE
@@ -70,17 +69,17 @@ public class PurchaseService {
 
     public BigDecimal getTotalHT(BigDecimal quantity, BigDecimal unitPriceHT){
         if (quantity == null || unitPriceHT == null) {
-            return BigDecimal.ZERO; // ou lève une exception selon ton besoin
+            return BigDecimal.ZERO;
         }
         return quantity.multiply(unitPriceHT);  
     }
 
-    public BigDecimal getTotalTVA(BigDecimal unitPriceHT, BigDecimal tvaRate) {
-        if (unitPriceHT == null || tvaRate == null) {
+    public BigDecimal getTotalTVA(BigDecimal totalHT, BigDecimal tvaRate) {
+        if (totalHT == null || tvaRate == null) {
             return BigDecimal.ZERO;
         }
 
-        return unitPriceHT
+        return totalHT
                 .multiply(tvaRate)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
@@ -110,18 +109,17 @@ public class PurchaseService {
         Product product = purchaseDto.productId() != null ? resolveService.resolveProduct(purchaseDto.productId()) : null;
         Invoice invoice = purchaseDto.invoiceId() != null ? resolveService.resolveInvoice(purchaseDto.invoiceId()) : null;
         User purchaser = purchaseDto.purchaserId() != null ? resolveService.resolveUser(purchaseDto.purchaserId()) : null;
+        if (invoice.isConfirmed()) {
+            throw new IllegalStateException("Confirmed purchases cannot be modified");
+        }
+        purchase.setInvoice(invoice);
 
-        User effectivePurchaser = purchaser != null ? purchaser : purchase.getPurchaser();
-
-
-        if (Boolean.TRUE.equals(purchaseDto.isConfirmed())
-            && purchase.getInvoice() == null
-            && invoice == null) {
-            throw new IllegalStateException("Cannot confirm a purchase without an invoice");
+        if(invoice != null){
+            invoice = invoiceService.updateInvoiceTotals(invoice);
         }
 
-        Purchase updates = PurchaseMapperService.toEntity(purchaseDto, product, invoice, purchaser);
-        BeanCopyUtils.copyNonNullProperties(updates, purchase, "id", "product", "invoice", "purchaser", "confirmed");
+        
+        BeanCopyUtils.copyNonNullProperties(purchaseDto, purchase);
 
         if (product != null) {
             purchase.setProduct(product);
@@ -129,21 +127,7 @@ public class PurchaseService {
         if (purchaseDto.isConfirmed() != null) {
             purchase.setConfirmed(purchaseDto.isConfirmed());
         }
-        if (invoice != null) {
-            if (effectivePurchaser == null) {
-                throw new IllegalStateException("Cannot assign an invoice without a purchaser");
-            }
-
-            User existingCustomer = invoice.getCustomer();
-            if (existingCustomer == null) {
-                invoice.setCustomer(effectivePurchaser);
-            } else if (!existingCustomer.getId().equals(effectivePurchaser.getId())) {
-                throw new IllegalStateException("Invoice is already linked to another customer");
-            }
-
-            invoiceRepository.save(invoice);
-            purchase.setInvoice(invoice);
-        }
+        
         if (purchaser != null) {
             purchase.setPurchaser(purchaser);
         }

@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import backend.dtos.PaymentDetailsDto;
 import backend.dtos.PaymentDetailsRequest;
-
-import backend.services.PaymentDetailsService;
-import backend.services.UserService;
-
+import backend.services.paymentdetails.PaymentDetailsService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

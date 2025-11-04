@@ -20,7 +20,7 @@ import backend.dtos.AuthUserDto;
 import backend.dtos.RegisterDto;
 import backend.models.User;
 import backend.repositories.UserRepository;
-import backend.services.UserService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.dtos.PurchaseDto;
-import backend.services.PurchaseService;
-import backend.services.ResolveService;
-import backend.services.UserService;
+import backend.services.purchase.PurchaseService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +27,6 @@ public class PurchaseController {
 
     private final PurchaseService purchaseService;
     private final UserService userService;
-    private final ResolveService resolveService;
 
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
@@ -111,27 +109,24 @@ public class PurchaseController {
     
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/{id}")
-    public ResponseEntity<?> setPurchase(HttpServletRequest request, @PathVariable Long id, @RequestBody PurchaseDto purchaseDto) {
-        String authHeader = request.getHeader("Authorization");
+    @PutMapping("/")
+    public ResponseEntity<?> setPurchase(HttpServletRequest request, @RequestBody PurchaseDto purchaseDto) {
+
         if (userService.isAdmin(request) == false) {
-        }
-        String token = authHeader.substring(7);
-        Long userId = userService.extractUserIdFromToken(token);
-        if (userId == null) {
             ResponseUtils.unauthorized("Invalid token");
         }
+        
         PurchaseDto purchaseDtoUpdated = new PurchaseDto(
-            id,
-            purchaseDto.productId(),
-            purchaseDto.name(),
-            purchaseDto.quantity(),
-            purchaseDto.unitPriceHT(),
-            purchaseDto.totalHT(),
-            purchaseDto.tvaApplied(),
-            purchaseDto.totalTva(),
-            userId,
-            purchaseDto.purchaserId(),
+            purchaseDto.id(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            purchaseDto.invoiceId(),
+            null,
             purchaseDto.isConfirmed()
         );
 

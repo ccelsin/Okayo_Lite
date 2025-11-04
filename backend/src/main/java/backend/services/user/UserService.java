@@ -1,4 +1,4 @@
-package backend.services;
+package backend.services.user;
 
 import java.util.List;
 import java.util.Optional;

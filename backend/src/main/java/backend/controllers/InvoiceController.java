@@ -2,6 +2,9 @@ package backend.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import backend.dtos.InvoiceDto;
 import backend.dtos.InvoiceRequest;
 import backend.dtos.InvoiceUpdateRequest;
-import backend.services.InvoiceService;
-import backend.services.UserService;
+import backend.models.Invoice;
+import backend.repositories.InvoiceRepository;
+import backend.services.PdfInvoiceRenderer;
+import backend.services.invoice.InvoiceService;
+import backend.services.user.UserService;
 import backend.utilities.ResponseUtils;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +35,28 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
     private final UserService userService;
+    private final InvoiceRepository invoiceRepository;
+    private final PdfInvoiceRenderer pdfInvoiceRenderer;
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> download(@PathVariable Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + id));
+
+        // S'assure que les totaux sont à jour avant rendu
+        invoiceService.updateInvoiceTotals(invoice);
+
+        byte[] pdf = pdfInvoiceRenderer.renderInvoicePage1(invoice);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("facture-" + invoice.getReference() + ".pdf")
+                        .build()
+        );
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
 
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
