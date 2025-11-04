@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import backend.configuration.JwtUtils;
@@ -69,7 +70,11 @@ public class UserService {
     }
 
     public UserDto setProfile(Long userId, UserDto userDto) {
-        
+        User check = userRepository.findByUsername(userDto.username());
+        if(check != null){
+            new DataIntegrityViolationException("Username already taken");
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User details not found"));
         
         BeanCopyUtils.copyNonNullProperties(userDto, user);

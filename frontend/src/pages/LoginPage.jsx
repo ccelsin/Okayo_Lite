@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ErrorAlert from "../components/ErrorAlert";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function LoginPage() {
   const { register, handleSubmit, formState } = useForm();
@@ -28,6 +29,8 @@ export default function LoginPage() {
   }
 
   return (
+    <DashboardLayout variant="auth">
+
     <div className="flex min-h-screen items-center justify-center bg-base-200">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
         <div className="card-body">
@@ -68,5 +71,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

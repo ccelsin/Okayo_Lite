@@ -1,5 +1,7 @@
 import client from "./client";
 
+// All Api calls around product
+
 export async function listProducts() {
   const { data } = await client.get("/api/product");
   return data;

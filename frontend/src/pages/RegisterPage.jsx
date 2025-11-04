@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { register as registerUser } from "../api/auth";
 import ErrorAlert from "../components/ErrorAlert";
 import { useAuth } from "../context/AuthContext";
+import DashboardLayout from "../layouts/DashboardLayout";
+
 
 export default function RegisterPage() {
   const { register, handleSubmit, formState } = useForm({
@@ -36,6 +38,7 @@ export default function RegisterPage() {
   }
 
   return (
+    <DashboardLayout variant="auth">
     <div className="flex min-h-screen items-center justify-center bg-base-200">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
         <div className="card-body">
@@ -86,5 +89,6 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

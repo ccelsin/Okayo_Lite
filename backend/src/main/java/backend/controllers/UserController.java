@@ -80,6 +80,11 @@ public class UserController {
         return UserMapperService.toDtoList(customers);
     }
 
+    @GetMapping("/isAdmin")
+    public boolean checkIfAdmin(HttpServletRequest request){
+        return userService.isAdmin(request);
+    }
+
     
     
 }

@@ -10,6 +10,14 @@ import { createInvoice, updateInvoice } from "../api/invoices";
 const safeCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n || 0));
 
+/** Si p.tvaApplied est un TAUX (ex: 20 => 20%) */
+const safePercent = (n) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n || 0) / 100);
+
 function useQuery() {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
@@ -25,8 +33,8 @@ export default function InvoiceCreateAssignPage() {
   const [paymentDetailsId, setPaymentDetailsId] = useState("");
   const [paymentDetails, setPaymentDetails] = useState([]);
   const [invoiceId, setInvoiceId] = useState(null);
-  const [billingDate, setBillingDate] = useState(""); // 🆕
-  const [dueDate, setDueDate] = useState(""); // 🆕
+  const [billingDate, setBillingDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
   const [loadingPD, setLoadingPD] = useState(false);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
@@ -69,7 +77,6 @@ export default function InvoiceCreateAssignPage() {
     try {
       setLoadingPurchases(true);
 
-      // 🆕 inclure les dates si présentes
       const payload = {
         customerId: cid,
         paymentDetailsId: pdid,
@@ -126,15 +133,18 @@ export default function InvoiceCreateAssignPage() {
 
   return (
     <DashboardLayout>
+      {/* Header mobile-first */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl sm:text-3xl font-bold">Créer & affecter une facture</h1>
-        <button className="btn btn-ghost w-full sm:w-auto" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost w-full sm:w-auto" onClick={() => navigate(-1)} type="button">
           Retour
         </button>
       </div>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
-        <div className="card bg-base-100 shadow md:col-span-1">
+      {/* Grille mobile-first : 1 colonne → desktop asymétrique */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[22rem,1fr]">
+        {/* Colonne gauche : infos facture */}
+        <div className="card bg-base-100 shadow">
           <div className="card-body">
             <h2 className="card-title">Informations facture</h2>
             <form className="space-y-3" onSubmit={handleCreateInvoice} noValidate>
@@ -144,7 +154,7 @@ export default function InvoiceCreateAssignPage() {
                   type="number"
                   min="1"
                   step="1"
-                  className="input input-bordered"
+                  className="input input-bordered h-11 w-full"
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
                   required
@@ -160,7 +170,7 @@ export default function InvoiceCreateAssignPage() {
               <label className="form-control">
                 <span className="label-text">Moyen de paiement</span>
                 <select
-                  className="select select-bordered"
+                  className="select select-bordered h-11 w-full"
                   value={paymentDetailsId}
                   onChange={(e) => setPaymentDetailsId(e.target.value)}
                   required
@@ -175,12 +185,12 @@ export default function InvoiceCreateAssignPage() {
                 </select>
               </label>
 
-              {/* 🆕 Dates non obligatoires */}
+              {/* Dates (facultatives) */}
               <label className="form-control">
                 <span className="label-text">Date de facturation</span>
                 <input
                   type="date"
-                  className="input input-bordered"
+                  className="input input-bordered h-11 w-full"
                   value={billingDate}
                   onChange={(e) => setBillingDate(e.target.value)}
                 />
@@ -190,7 +200,7 @@ export default function InvoiceCreateAssignPage() {
                 <span className="label-text">Date d’échéance</span>
                 <input
                   type="date"
-                  className="input input-bordered"
+                  className="input input-bordered h-11 w-full"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                 />
@@ -213,17 +223,17 @@ export default function InvoiceCreateAssignPage() {
           </div>
         </div>
 
-        {/* Table des achats */}
-        <div className="md:col-span-2">
+        {/* Colonne droite : achats */}
+        <div>
           {loadingPurchases && <LoadingIndicator />}
           {error && <ErrorAlert error={error} />}
 
           {invoiceId && !loadingPurchases && (
             <div className="card bg-base-100 shadow">
               <div className="card-body">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="card-title">Achats du client</h3>
-                  <button className="btn btn-success btn-sm" onClick={handleConfirmInvoice}>
+                  <button className="btn btn-success btn-sm w-full sm:w-auto" onClick={handleConfirmInvoice} type="button">
                     Valider la facture
                   </button>
                 </div>
@@ -231,18 +241,18 @@ export default function InvoiceCreateAssignPage() {
                 {Array.isArray(purchases) && purchases.length > 0 ? (
                   <div className="overflow-x-auto mt-3">
                     <table className="table">
-                      <thead>
+                      <thead className="text-sm">
                         <tr>
                           <th>Affecter</th>
                           <th>ID</th>
                           <th>Produit</th>
-                          <th>Qté</th>
-                          <th>Total HT</th>
-                          <th>TVA</th>
-                          <th>Total TVA</th>
+                          <th className="text-right whitespace-nowrap">Qté</th>
+                          <th className="text-right whitespace-nowrap">Total HT</th>
+                          <th className="text-right whitespace-nowrap">TVA</th>
+                          <th className="text-right whitespace-nowrap">Total TVA</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="[&>tr>td]:align-middle text-sm">
                         {purchases.map((p) => (
                           <tr key={p?.id}>
                             <td>
@@ -253,12 +263,12 @@ export default function InvoiceCreateAssignPage() {
                                 onChange={(e) => toggleAttach(p, e.target.checked)}
                               />
                             </td>
-                            <td>{p?.id}</td>
-                            <td>{p?.name ?? "-"}</td>
-                            <td>{p?.quantity ?? 0}</td>
-                            <td>{safeCurrency(p?.totalHT)}</td>
-                            <td>{safeCurrency(p?.tvaApplied)}</td>
-                            <td>{safeCurrency(p?.totalTva)}</td>
+                            <td className="whitespace-nowrap">{p?.id}</td>
+                            <td className="min-w-[14rem]">{p?.name ?? "-"}</td>
+                            <td className="text-right whitespace-nowrap">{p?.quantity ?? 0}</td>
+                            <td className="text-right whitespace-nowrap">{safeCurrency(p?.totalHT)}</td>
+                            <td className="text-right whitespace-nowrap">{safePercent(p?.tvaApplied)}</td>
+                            <td className="text-right whitespace-nowrap">{safeCurrency(p?.totalTva)}</td>
                           </tr>
                         ))}
                       </tbody>

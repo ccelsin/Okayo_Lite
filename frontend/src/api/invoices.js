@@ -1,5 +1,7 @@
 import client from "./client";
 
+// All Api calls around invoice
+
 export async function listInvoices() {
   const response = await client.get("/api/invoices");
   return response.data;

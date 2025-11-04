@@ -22,6 +22,12 @@ const formatDate = (iso) => {
   }).format(d);
 };
 
+const safePercent = (n) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n || 0) / 100);
 export default function Invoices() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,7 @@
 import client from "./client";
 
+// All Api calls around paymentDetails
+
 export async function listPaymentDetails() {
   const { data } = await client.get("/api/payment-details");
   return data;

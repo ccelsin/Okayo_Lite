@@ -14,6 +14,7 @@ import ProfilePage from "../pages/ProfilePage";
 import ShoppingPage from "../pages/ShoppingPage";
 import MyInvoices from "../pages/MyInvoices";
 import InvoiceEdit from "../pages/InvoiceEdit";
+import LandingPage from "../pages/LandingPage";
 
 export default function AppRouter() {
   return (
@@ -110,6 +111,12 @@ export default function AppRouter() {
           element={<ProtectedRoute>
                     <InvoiceEdit />
                   </ProtectedRoute>} />
+        
+        <Route 
+          path="/accueil" 
+          element={
+                    <LandingPage />
+                  } />
         
         
 

@@ -1,3 +1,5 @@
+// Loading component when api calls take time
+
 export default function LoadingIndicator({ label = "Chargement..." }) {
   return (
     <div className="flex items-center justify-center py-8">

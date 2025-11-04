@@ -1,5 +1,7 @@
 import client from "./client";
 
+//Api call around users
+
 export async function getProfile() {
   const { data } = await client.get("/api/user/profile");
   return data;

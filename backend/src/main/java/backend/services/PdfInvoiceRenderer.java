@@ -109,10 +109,23 @@ public class PdfInvoiceRenderer {
           .append("    .col-total       { width:20%; }\n")
           .append("    tbody tr { break-inside: avoid; page-break-inside: avoid; }\n")
           .append("    .foot { margin-top: 6mm; break-inside: avoid; page-break-inside: avoid; }\n")
+
+          // --- Totaux en 2 colonnes (label + montant) → espace garanti ---
           .append("    .totals { margin-top: 5mm; }\n")
-          .append("    .tot-line { display:flex; justify-content: space-between; margin: 1mm 0; }\n")
-          .append("    .grand { font-weight:bold; font-size: 13px; border-top: 1px solid #000; padding-top: 1.5mm; }\n")
+          .append("    .tot-line { display: table; width: 100%; margin: 1mm 0; }\n")
+          .append("    .tot-line .label { display: table-cell; padding-right: 4mm; }\n")
+          .append("    .tot-line .amount { display: table-cell; text-align: right; white-space: nowrap; }\n")
+          .append("    .grand .label, .grand .amount { font-weight: bold; font-size: 13px; }\n")
+          .append("    .grand .amount { border-top: 1px solid #000; padding-top: 1.5mm; }\n")
+
           .append("    .small { font-size: 9.5px; color:#444; }\n")
+
+          // Bloc clé/valeur (virement) au propre en 2 colonnes
+          .append("    .kv { margin-top: 3mm; display: table; width: 100%; }\n")
+          .append("    .kv-row { display: table-row; }\n")
+          .append("    .kv-label { display: table-cell; padding-right: 3mm; color:#444; white-space: nowrap; }\n")
+          .append("    .kv-value { display: table-cell; }\n")
+
           // Densification progressive si bcp de lignes
           .append("    .dense table th, .dense table td { padding: 1.8mm; }\n")
           .append("    .dense body, .dense td, .dense th { font-size: 10.5px; }\n")
@@ -164,11 +177,12 @@ public class PdfInvoiceRenderer {
           .append("  <div class=\"foot\">\n")
           .append("    <div>").append(escapeHtml(conditionsRegl)).append("</div>\n")
 
+          // --- Totaux avec espacement robuste ---
           .append("    <div class=\"totals\">\n")
-          .append("      <div class=\"tot-line\"><span><strong>Total HT</strong></span><span>")
+          .append("      <div class=\"tot-line\"><span class=\"label\"><strong>Total HT</strong></span><span class=\"amount\">")
           .append(escapeHtml(fmtMoney(totalHT))).append("</span></div>\n")
           .append(       tvaLines).append("\n")
-          .append("      <div class=\"tot-line grand\"><span>Total TTC</span><span>")
+          .append("      <div class=\"tot-line grand\"><span class=\"label\">Total TTC</span><span class=\"amount\">")
           .append(escapeHtml(fmtMoney(totalTTC))).append("</span></div>\n")
           .append("    </div>\n")
 
@@ -243,6 +257,7 @@ public class PdfInvoiceRenderer {
         return sb.toString();
     }
 
+    /** Lignes de TVA au format 2 colonnes (label/amount) pour éviter les textes collés */
     private String buildTvaLines(Map<BigDecimal, BigDecimal> totalTvaByRate) {
         if (totalTvaByRate == null || totalTvaByRate.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
@@ -250,21 +265,41 @@ public class PdfInvoiceRenderer {
                 .sorted(Map.Entry.<BigDecimal, BigDecimal>comparingByKey().reversed())
                 .forEach(e -> {
                     sb.append("<div class=\"tot-line\">")
-                      .append("<span>Total TVA ").append(escapeHtml(fmtRate(e.getKey()))).append("%</span>")
-                      .append("<span>").append(escapeHtml(fmtMoney(e.getValue()))).append("</span>")
+                      .append("<span class=\"label\">Total TVA ")
+                      .append(escapeHtml(fmtRate(e.getKey()))).append("%</span>")
+                      .append("<span class=\"amount\">")
+                      .append(escapeHtml(fmtMoney(e.getValue())))
+                      .append("</span>")
                       .append("</div>\n");
                 });
         return sb.toString();
     }
 
+    /** Bloc virement en 2 colonnes (label/valeur) pour une lecture plus nette */
     private String buildVirementBlock(PaymentDetails pd) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div style=\"margin-top:5mm\">");
         sb.append("<div><strong>Règlement par virement :</strong></div>");
-        sb.append(lineIfNotBlank(pd != null ? pd.getDomiciliation() : null, "Domiciliation: "));
-        sb.append(lineIfNotBlank(pd != null ? pd.getHolderName()    : null, "Titulaire: "));
-        sb.append(lineIfNotBlank(pd != null ? pd.getIban()          : null, "IBAN: "));
-        sb.append(lineIfNotBlank(pd != null ? pd.getBic()           : null, "BIC/SWIFT: "));
+        sb.append("<div class=\"kv\">");
+        if (pd != null) {
+            if (notBlank(pd.getDomiciliation())) {
+                sb.append("<div class=\"kv-row\"><div class=\"kv-label\">Domiciliation:</div><div class=\"kv-value\">")
+                  .append(escapeHtml(pd.getDomiciliation())).append("</div></div>");
+            }
+            if (notBlank(pd.getHolderName())) {
+                sb.append("<div class=\"kv-row\"><div class=\"kv-label\">Titulaire:</div><div class=\"kv-value\">")
+                  .append(escapeHtml(pd.getHolderName())).append("</div></div>");
+            }
+            if (notBlank(pd.getIban())) {
+                sb.append("<div class=\"kv-row\"><div class=\"kv-label\">IBAN:</div><div class=\"kv-value\">")
+                  .append(escapeHtml(pd.getIban())).append("</div></div>");
+            }
+            if (notBlank(pd.getBic())) {
+                sb.append("<div class=\"kv-row\"><div class=\"kv-label\">BIC/SWIFT:</div><div class=\"kv-value\">")
+                  .append(escapeHtml(pd.getBic())).append("</div></div>");
+            }
+        }
+        sb.append("</div>"); // .kv
         sb.append("</div>");
         return sb.toString();
     }
@@ -304,6 +339,8 @@ public class PdfInvoiceRenderer {
     }
 
     private String safe(String s) { return (s == null || s.isBlank()) ? "-" : s; }
+
+    private boolean notBlank(String s) { return s != null && !s.isBlank(); }
 
     private String lineIfNotBlank(String s) {
         if (s == null || s.isBlank()) return "";

@@ -9,6 +9,13 @@ import { listPurchases } from "../api/purchases";
 const safeCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n || 0));
 
+const safePercent = (n) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n || 0) / 100);
+
 export default function PurchasesPage() {
   const navigate = useNavigate();
   const { data: raw, isLoading, error, refresh } = useAsync(listPurchases, []);
@@ -56,12 +63,12 @@ export default function PurchasesPage() {
                       <td>{p?.name ?? "-"}</td>
                       <td>{p?.quantity ?? 0}</td>
                       <td>{safeCurrency(p?.totalHT)}</td>
-                      <td>{safeCurrency(p?.tvaApplied)}</td>
+                      <td>{safePercent(p?.tvaApplied)}</td>
                       <td>{safeCurrency(p?.totalTva)}</td>
                       <td>{p?.purchaserId ?? "-"}</td>
                       <td>
                         <span className={`badge ${p?.isConfirmed ? "badge-success" : "badge-warning"}`}>
-                          {p?.isConfirmed ? "Oui" : "En attente"}
+                          {p?.isConfirmed ? "Oui" : "Presque"}
                         </span>
                       </td>
                       <td className="text-right">

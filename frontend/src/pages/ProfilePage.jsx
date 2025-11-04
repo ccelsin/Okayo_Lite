@@ -39,6 +39,9 @@ export default function ProfilePage() {
               <span className="label-text">Nom d'utilisateur</span>
             </label>
             <input id="username" className="input input-bordered" {...register("username", { required: true })} />
+            <label className="label" htmlFor="username">
+              <span className="label-text">Après changement de nom vous devez vous déconnecter</span>
+            </label>
           </div>
           <div className="form-control">
             <label className="label" htmlFor="email">

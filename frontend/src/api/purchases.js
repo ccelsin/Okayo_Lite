@@ -1,5 +1,7 @@
 import client from "./client";
 
+// All Api calls around purchase
+
 export async function createPurchase(payload) {
   const { data } = await client.post("/api/purchase", payload);
   return data;

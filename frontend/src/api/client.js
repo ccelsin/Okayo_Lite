@@ -1,6 +1,8 @@
 import axios from "axios";
 import { API_BASE_URL, TOKEN_STORAGE_KEY } from "../utils/constants";
 
+
+// Create a Facade for our axios calls
 const client = axios.create({
   baseURL: API_BASE_URL
 });

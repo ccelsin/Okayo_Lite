@@ -10,6 +10,14 @@ import { listPurchasesByCustomerPending, updatePurchase } from "../api/purchases
 const safeCurrency = (n) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n || 0));
 
+const safePercent = (n) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n || 0) / 100);
+
+  
 const fmtDateInput = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
@@ -140,84 +148,104 @@ export default function InvoiceEdit() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-slate-50">
-        <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Modifier la facture</h1>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate(-1)}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Retour
-              </button>
-              <button
-                onClick={onDownload}
-                className="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-              >
-                Télécharger PDF
-              </button>
-            </div>
+  <DashboardLayout>
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+            Modifier la facture
+          </h1>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="btn btn-outline btn-sm sm:btn-md"
+              type="button"
+            >
+              Retour
+            </button>
+            <button
+              onClick={onDownload}
+              className="btn btn-primary btn-sm sm:btn-md"
+              type="button"
+            >
+              Télécharger PDF
+            </button>
           </div>
+        </div>
 
-          {/* Facture - infos & formulaire */}
-          {loading ? (
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm">
-              Chargement…
-            </div>
-          ) : error ? (
-            <div className="mt-4"><ErrorAlert error={error} /></div>
-          ) : (
-            <form onSubmit={onSave} className="mt-6 grid gap-6 md:grid-cols-3">
-              {/* Colonne gauche : infos facture */}
-              <div className="md:col-span-1 rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-600">Référence</label>
-                  <input
-                    type="text"
-                    value={reference}
-                    disabled
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
-                  />
-                  <p className="mt-1 text-xs text-slate-500">
+        {/* Facture - infos & formulaire */}
+        {loading ? (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm">
+            Chargement…
+          </div>
+        ) : error ? (
+          <div className="mt-4">
+            <ErrorAlert error={error} />
+          </div>
+        ) : (
+          <form
+            onSubmit={onSave}
+            className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3"
+          >
+            {/* Colonne gauche : infos facture */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm space-y-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Référence</span>
+                </label>
+                <input
+                  type="text"
+                  value={reference}
+                  disabled
+                  className="input input-bordered w-full bg-slate-50"
+                />
+                <label className="label">
+                  <span className="label-text-alt text-slate-500">
                     La référence est générée côté serveur et n’est pas modifiable.
-                  </p>
-                </div>
+                  </span>
+                </label>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-600">Client ID</label>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Client ID</span>
+                </label>
+                <input
+                  type="number"
+                  value={customerId ?? ""}
+                  disabled
+                  className="input input-bordered w-full bg-slate-50"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Facturation</span>
+                  </label>
                   <input
-                    type="number"
-                    value={customerId ?? ""}
-                    disabled
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    type="date"
+                    value={billingDate}
+                    onChange={(e) => setBillingDate(e.target.value)}
+                    className="input input-bordered w-full"
                   />
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-600">Date de facturation</label>
-                    <input
-                      type="date"
-                      value={billingDate}
-                      onChange={(e) => setBillingDate(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-600">Date d’échéance</label>
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
-                    />
-                  </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Echéance</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="input input-bordered w-full"
+                  />
                 </div>
+              </div>
 
-                <div className="flex items-center gap-3">
+              <div className="form-control">
+                <label className="label cursor-pointer justify-start gap-3">
                   <input
                     id="isConfirmed"
                     type="checkbox"
@@ -225,97 +253,99 @@ export default function InvoiceEdit() {
                     onChange={(e) => setIsConfirmed(e.target.checked)}
                     className="checkbox checkbox-sm"
                   />
-                  <label htmlFor="isConfirmed" className="text-sm text-slate-700">
-                    Facture confirmée
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate(-1)}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-                  >
-                    {saving ? "Enregistrement…" : "Enregistrer"}
-                  </button>
-                </div>
+                  <span className="label-text">Facture confirmée</span>
+                </label>
               </div>
 
-              {/* Colonne droite : achats */}
-              <div className="md:col-span-2">
-                {loadingPurchases && <LoadingIndicator />}
-                {!loadingPurchases && (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">Achats du client</h3>
-                      {/* Optionnel : action rapide pour confirmer */}
-                      <button
-                        type="button"
-                        onClick={() => setIsConfirmed(true)}
-                        className="btn btn-success btn-sm"
-                      >
-                        Marquer comme confirmée
-                      </button>
-                    </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="btn btn-outline"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary disabled:opacity-60"
+                >
+                  {saving ? "Enregistrement…" : "Enregistrer"}
+                </button>
+              </div>
+            </div>
 
-                    {Array.isArray(purchases) && purchases.length > 0 ? (
-                      <div className="overflow-x-auto mt-3">
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th>Affecter</th>
-                              <th>ID</th>
-                              <th>Produit</th>
-                              <th>Qté</th>
-                              <th>Total HT</th>
-                              <th>TVA</th>
-                              <th>Total TVA</th>
-                              <th>Facture</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {purchases.map((p) => {
-                              const checked = !!p?.invoiceId && Number(p.invoiceId) === invoiceId;
-                              return (
-                                <tr key={p?.id}>
-                                  <td>
-                                    <input
-                                      type="checkbox"
-                                      className="checkbox"
-                                      checked={checked}
-                                      onChange={(e) => toggleAttach(p, e.target.checked)}
-                                    />
-                                  </td>
-                                  <td>{p?.id}</td>
-                                  <td>{p?.name ?? "-"}</td>
-                                  <td>{p?.quantity ?? 0}</td>
-                                  <td>{safeCurrency(p?.totalHT)}</td>
-                                  <td>{safeCurrency(p?.tvaApplied)}</td>
-                                  <td>{safeCurrency(p?.totalTva)}</td>
-                                  <td>{p?.invoiceId ?? "—"}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="p-6 text-center text-sm opacity-70">Aucun achat à afficher.</div>
-                    )}
+            {/* Colonne droite : achats */}
+            <div className="lg:col-span-2">
+              {loadingPurchases && <LoadingIndicator />}
+              {!loadingPurchases && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 className="text-lg font-semibold">Achats du client</h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmed(true)}
+                      className="btn btn-success btn-sm"
+                    >
+                      Marquer comme confirmée
+                    </button>
                   </div>
-                )}
-              </div>
-            </form>
-          )}
-        </div>
+
+                  {Array.isArray(purchases) && purchases.length > 0 ? (
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="table table-zebra w-full">
+                        <thead className="text-sm">
+                          <tr>
+                            <th className="whitespace-nowrap">Affecter</th>
+                            <th className="whitespace-nowrap">ID</th>
+                            <th>Produit</th>
+                            <th className="whitespace-nowrap">Qté</th>
+                            <th className="whitespace-nowrap">Total HT</th>
+                            <th className="whitespace-nowrap">TVA</th>
+                            <th className="whitespace-nowrap">Total TVA</th>
+                            <th className="whitespace-nowrap">Facture</th>
+                          </tr>
+                        </thead>
+                        <tbody className="[&>tr>td]:align-middle text-sm">
+                          {purchases.map((p) => {
+                            const checked =
+                              !!p?.invoiceId && Number(p.invoiceId) === invoiceId;
+                            return (
+                              <tr key={p?.id}>
+                                <td>
+                                  <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-sm"
+                                    checked={checked}
+                                    onChange={(e) => toggleAttach(p, e.target.checked)}
+                                  />
+                                </td>
+                                <td className="whitespace-nowrap">{p?.id}</td>
+                                <td className="min-w-[12rem]">{p?.name ?? "-"}</td>
+                                <td className="whitespace-nowrap">{p?.quantity ?? 0}</td>
+                                <td className="whitespace-nowrap">{safeCurrency(p?.totalHT)}</td>
+                                <td className="whitespace-nowrap">{safePercent(p?.tvaApplied)}</td>
+                                <td className="whitespace-nowrap">{safeCurrency(p?.totalTva)}</td>
+                                <td className="whitespace-nowrap">{p?.invoiceId ?? "—"}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-sm opacity-70">
+                      Aucun achat à afficher.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </form>
+        )}
       </div>
-    </DashboardLayout>
-  );
+    </div>
+  </DashboardLayout>
+);
+
 }

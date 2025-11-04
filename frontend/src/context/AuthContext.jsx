@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { TOKEN_STORAGE_KEY } from "../utils/constants";
 import { login as loginRequest } from "../api/auth";
 
+// Set up of the context with keep the authentification token
+
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {

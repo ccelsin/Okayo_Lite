@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import DashboardLayout from "../layouts/DashboardLayout";
 import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorAlert from "../components/ErrorAlert";
 import { useAsync } from "../hooks/useAsync";
 import { createTva, listTva, updateTva } from "../api/tva";
 import Swal from "sweetalert2";
@@ -25,6 +26,13 @@ export default function TvaPage() {
       endEvolutionDate: "",
     },
   });
+
+  const safePercent = (n) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n || 0) / 100);
 
   const [mode, setMode] = useState("list"); // list | create | edit
   const [selectedId, setSelectedId] = useState(null);
@@ -51,7 +59,6 @@ export default function TvaPage() {
 
   async function onSubmitCreate(values) {
     const payload = {
-      // champs vides => null (sauf defaultRate requis)
       previousRate: values.previousRate === "" ? null : Number(values.previousRate),
       defaultRate: Number(values.defaultRate),
       futureRate: values.futureRate === "" ? null : Number(values.futureRate),
@@ -160,9 +167,8 @@ export default function TvaPage() {
                     disabled={isSubmitting}
                     {...register("previousRate", {
                       validate: (v) =>
-                          v === "" || v === null || (v >= 0 && v <= 99.99) || "Doit être entre 0 et 99.99",
+                        v === "" || v === null || (Number(v) >= 0 && Number(v) <= 99.99) || "Doit être entre 0 et 99.99",
                     })}
-
                   />
                 </label>
 
@@ -179,9 +185,8 @@ export default function TvaPage() {
                     disabled={isSubmitting}
                     {...register("defaultRate", {
                       required: "Champ requis",
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Min 0" },
-                      max: { value: 99.99, message: "Max 99.99" },
+                      validate: (v) =>
+                        v !== "" && Number(v) >= 0 && Number(v) <= 99.99 || "Doit être entre 0 et 99.99",
                     })}
                   />
                 </label>
@@ -197,9 +202,9 @@ export default function TvaPage() {
                     className={`input input-bordered w-full ${errors.futureRate ? "input-error" : ""}`}
                     placeholder="ex: 21.0"
                     disabled={isSubmitting}
-                    {...register("previousRate", {
+                    {...register("futureRate", { // ✅ corrige la typo: c'était "previousRate"
                       validate: (v) =>
-                          v === "" || v === null || (v >= 0 && v <= 99.99) || "Doit être entre 0 et 99.99",
+                        v === "" || v === null || (Number(v) >= 0 && Number(v) <= 99.99) || "Doit être entre 0 et 99.99",
                     })}
                   />
                 </label>
@@ -228,14 +233,10 @@ export default function TvaPage() {
           </div>
         )}
 
-        {/* Liste: mobile => cartes, desktop => tableau */}
+        {/* Liste: mobile => cartes, desktop => tableau (uniformisé) */}
         <div className={`${mode === "list" ? "block" : "md:col-span-2"} md:col-span-2`}>
           {isLoading && <LoadingIndicator />}
-          {error && (
-            <div className="alert alert-error">
-              <span>Erreur de chargement : {String(error?.message || error)}</span>
-            </div>
-          )}
+          <ErrorAlert error={error} />
 
           {Array.isArray(data) && data.length > 0 ? (
             <>
@@ -260,7 +261,7 @@ export default function TvaPage() {
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3">
                         <div className="opacity-60">Précédent</div>
-                        <div className="font-medium">{nfNumber.format(tva.previousRate ?? 0)}</div>
+                        <div className="font-medium">{safePercent(nfNumber.format(tva.previousRate ?? 0))}</div>
                         <div className="opacity-60">Actuel</div>
                         <div className="font-medium">{nfNumber.format(tva.defaultRate ?? 0)}</div>
                         <div className="opacity-60">Futur</div>
@@ -275,62 +276,87 @@ export default function TvaPage() {
                         <button className="btn btn-sm" onClick={() => { setSelectedId(tva.id); fillFormFromTva(tva); setMode("edit"); }}>
                           Modifier
                         </button>
-                        {/* Suppression retirée */}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Tableau (desktop) */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>ID</th>
-                      <th>Précédent</th>
-                      <th>Actuel</th>
-                      <th>Futur</th>
-                      <th>Début</th>
-                      <th>Fin</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((tva) => (
-                      <tr key={tva.id} className={selectedId === tva.id ? "bg-base-200" : ""}>
-                        <td>
-                          <input
-                            type="radio"
-                            name="selected-desktop"
-                            className="radio"
-                            checked={selectedId === tva.id}
-                            onChange={() => setSelectedId(tva.id)}
-                          />
-                        </td>
-                        <td>{tva.id}</td>
-                        <td>{nfNumber.format(tva.previousRate ?? 0)}</td>
-                        <td>{nfNumber.format(tva.defaultRate ?? 0)}</td>
-                        <td>{nfNumber.format(tva.futureRate ?? 0)}</td>
-                        <td>{tva.startEvolutionDate ? new Date(tva.startEvolutionDate).toLocaleDateString("fr-FR") : "-"}</td>
-                        <td>{tva.endEvolutionDate ? new Date(tva.endEvolutionDate).toLocaleDateString("fr-FR") : "-"}</td>
-                        <td className="flex gap-2 justify-end">
-                          <button className="btn btn-xs" onClick={() => { setSelectedId(tva.id); fillFormFromTva(tva); setMode("edit"); }}>
-                            Modifier
-                          </button>
-                          {/* Bouton supprimer retiré */}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Desktop UNIFORMISÉ */}
+              <div className="hidden md:block">
+                <div className="card bg-base-100 shadow">
+                  <div className="card-body pb-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="card-title">Liste des taux de TVA</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm opacity-70">
+                          {selectedId ? `Sélection : #${selectedId}` : "Aucune sélection"}
+                        </span>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          disabled={!selectedId}
+                          onClick={() => { fillFormFromTva(selectedTva); setMode("edit"); }}
+                        >
+                          Modifier la sélection
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Actions de groupe: suppression retirée */}
-                <div className="mt-3 flex items-center gap-2">
-                  <button className="btn btn-outline" disabled={!selectedId} onClick={() => { fillFormFromTva(selectedTva); setMode("edit"); }}>
-                    Modifier la sélection
-                  </button>
+                  <div className="overflow-x-auto">
+                    <table className="table table-zebra">
+                      <thead className="sticky top-0 bg-base-100 z-10">
+                        <tr>
+                          <th className="w-12">#</th>
+                          <th className="w-16">ID</th>
+                          <th>Précédent</th>
+                          <th>Actuel</th>
+                          <th>Futur</th>
+                          <th>Début</th>
+                          <th>Fin</th>
+                          <th className="w-28 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.map((tva) => (
+                          <tr
+                            key={tva.id}
+                            className={`hover ${selectedId === tva.id ? "bg-base-200" : ""}`}
+                            onClick={() => setSelectedId(tva.id)}
+                          >
+                            <td>
+                              <input
+                                type="radio"
+                                name="selected-desktop"
+                                className="radio"
+                                checked={selectedId === tva.id}
+                                onChange={() => setSelectedId(tva.id)}
+                              />
+                            </td>
+                            <td>{tva.id}</td>
+                            <td>{nfNumber.format(tva.previousRate ?? 0)}</td>
+                            <td>{nfNumber.format(tva.defaultRate ?? 0)}</td>
+                            <td>{nfNumber.format(tva.futureRate ?? 0)}</td>
+                            <td>{tva.startEvolutionDate ? new Date(tva.startEvolutionDate).toLocaleDateString("fr-FR") : "-"}</td>
+                            <td>{tva.endEvolutionDate ? new Date(tva.endEvolutionDate).toLocaleDateString("fr-FR") : "-"}</td>
+                            <td className="text-right">
+                              <button
+                                className="btn btn-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedId(tva.id);
+                                  fillFormFromTva(tva);
+                                  setMode("edit");
+                                }}
+                              >
+                                Modifier
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </>
