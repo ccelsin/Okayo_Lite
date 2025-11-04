@@ -139,4 +139,18 @@ public class PurchaseController {
             return ResponseUtils.conflict(ex.getMessage());
         }
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<?> getPurchasePending(HttpServletRequest request) {
+        if (userService.isAdmin (request) == false) {
+            return ResponseUtils.unauthorized("Access denied");
+        }
+        Long purchaserId = userService.extractUserIdFromRequest(request);
+        if (purchaserId == null) {
+            return ResponseUtils.unauthorized("Access denied");
+        }
+
+        List<PurchaseDto> purchases = purchaseService.getPurchasePending();
+        return ResponseEntity.ok(purchases);
+    }
 }

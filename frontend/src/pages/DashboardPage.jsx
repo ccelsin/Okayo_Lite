@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 const shortcuts = [
   {
@@ -26,6 +26,10 @@ const shortcuts = [
     title: "TVA",
     description: "Gérez les taux de TVA en fonction de la réglementation.",
     to: "/tva"
+  },{
+    title: "Articles",
+    description: "Consultez les Offres Okayo et commandez",
+    to: "/shop"
   }
 ];
 

@@ -1,14 +1,16 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute";
-import LoginPage from "../pages/shared/LoginPage";
-import RegisterPage from "../pages/shared/RegisterPage";
-import DashboardPage from "../pages/shared/DashboardPage";
-import ProductsPage from "../pages/admin/ProductsPage";
-import PurchasesPage from "../pages/admin/PurchasesPage";
-import MyPurchasesPage from "../pages/customer/MyPurchasesPage";
-import PaymentDetailsPage from "../pages/admin/PaymentDetailsPage";
-import TvaPage from "../pages/admin/TvaPage";
-import ProfilePage from "../pages/shared/ProfilePage";
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
+import DashboardPage from "../pages/DashboardPage";
+import ProductsPage from "../pages/ProductsPage";
+import PurchasesPage from "../pages/PurchasesPage";
+import InvoicesPage from "../pages/InvoicesPage";
+import MyPurchasesPage from "../pages/MyPurchasesPage";
+import PaymentDetailsPage from "../pages/PaymentDetailsPage";
+import TvaPage from "../pages/TvaPage";
+import ProfilePage from "../pages/ProfilePage";
+import ShoppingPage from "../pages/ShoppingPage";
 
 export default function AppRouter() {
   return (
@@ -59,8 +61,16 @@ export default function AppRouter() {
         <Route
           path="/tva"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute adminOnly>
               <TvaPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/invoices"
+          element={
+            <ProtectedRoute adminOnly>
+              <InvoicesPage />
             </ProtectedRoute>
           }
         />
@@ -69,6 +79,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shop"
+          element={
+            <ProtectedRoute>
+              <ShoppingPage />
             </ProtectedRoute>
           }
         />

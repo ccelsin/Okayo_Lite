@@ -15,8 +15,8 @@ export async function createTva(payload) {
   return data;
 }
 
-export async function updateTva(id, payload) {
-  const { data } = await client.put(`/api/tva/${id}`, payload);
+export async function updateTva(payload) {
+  const { data } = await client.put(`/api/tva`, payload);
   return data;
 }
 

@@ -31,7 +31,7 @@ public class TvaController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     public ResponseEntity<?> getAllTva(HttpServletRequest request) {
-        if (userService.isAuthorized(request) == false) {
+        if (userService.isAdmin(request) == false) {
             return ResponseUtils.unauthorized("Access denied");
         }
         List<TvaDto> tvaList = tvaService.getAllTva();
@@ -59,25 +59,13 @@ public class TvaController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<?> setTva(HttpServletRequest request, @RequestBody TvaDto tvaDetails) {
-        if (userService.isAuthorized(request) == false) {
+        if (userService.isAdmin(request) == false) {
             return ResponseUtils.unauthorized("Access denied");
         }
         TvaDto updatedTva = tvaService.setTva(tvaDetails);
         return ResponseEntity.ok(updatedTva);
-    }
-
-    @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTva(@PathVariable Long id) {
-       TvaDto tva = tvaService.getTva(id);
-        if (tva == null) {
-            return ResponseUtils.notFound("Tva not found with id " + id);
-        }
-        tvaService.deleteTva(id);
-
-        return ResponseEntity.noContent().build();
     }
     
 }

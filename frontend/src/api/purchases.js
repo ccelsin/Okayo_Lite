@@ -6,7 +6,7 @@ export async function createPurchase(payload) {
 }
 
 export async function listPurchases() {
-  const { data } = await client.get("/api/purchase");
+  const { data } = await client.get("/api/purchase/pending");
   return data;
 }
 
@@ -15,8 +15,8 @@ export async function listMyPurchases() {
   return data;
 }
 
-export async function updatePurchase(id, payload) {
-  const { data } = await client.put(`/api/purchase/${id}`, payload);
+export async function updatePurchase(payload) {
+  const { data } = await client.put(`/api/purchase`, payload);
   return data;
 }
 

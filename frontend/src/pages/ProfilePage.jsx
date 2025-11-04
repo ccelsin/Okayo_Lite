@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import DashboardLayout from "../../layouts/DashboardLayout";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import ErrorAlert from "../../components/ErrorAlert";
-import { useAsync } from "../../hooks/useAsync";
-import { getProfile, updateProfile } from "../../api/users";
+import DashboardLayout from "../layouts/DashboardLayout";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorAlert from "../components/ErrorAlert";
+import { useAsync } from "../hooks/useAsync";
+import { getProfile, updateProfile } from "../api/users";
 
 export default function ProfilePage() {
   const { data, isLoading, error, refresh } = useAsync(getProfile, []);

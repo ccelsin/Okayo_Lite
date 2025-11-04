@@ -63,7 +63,7 @@ public class ProductController {
 
     // Update an existing product when the user has admin rights.
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<?> setProduct(HttpServletRequest request, @RequestBody ProductDto productDto) {
         if (userService.isAuthorized(request) == false) {
             return ResponseUtils.unauthorized("Access denied");

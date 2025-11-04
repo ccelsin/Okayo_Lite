@@ -15,7 +15,7 @@ export async function createProduct(payload) {
   return data;
 }
 
-export async function updateProduct(id, payload) {
-  const { data } = await client.put(`/api/product/${id}`, payload);
+export async function updateProduct(payload) {
+  const { data } = await client.put(`/api/product`, payload);
   return data;
 }

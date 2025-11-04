@@ -66,7 +66,7 @@ public class PaymentDetailsController {
 
     // Update payment details when the user has admin rights.
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<?> setPaymentDetails(HttpServletRequest request, @RequestBody PaymentDetailsDto paymentDetailsDto) {
         if (userService.isAdmin(request) == false) {
             return ResponseUtils.forbidden("Access denied");

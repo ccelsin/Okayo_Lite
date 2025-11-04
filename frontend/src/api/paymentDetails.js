@@ -10,8 +10,8 @@ export async function createPaymentDetails(payload) {
   return data;
 }
 
-export async function updatePaymentDetails(id, payload) {
-  const { data } = await client.put(`/api/payment-details/${id}`, payload);
+export async function updatePaymentDetails(payload) {
+  const { data } = await client.put(`/api/payment-details`, payload);
   return data;
 }
 

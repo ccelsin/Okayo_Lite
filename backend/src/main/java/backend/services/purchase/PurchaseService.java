@@ -90,6 +90,11 @@ public class PurchaseService {
         return PurchaseMapperService.toDtoList(purchases);
     }
 
+    public List<PurchaseDto> getPurchasePending(){
+        List<Purchase> purchases = purchaseRepository.findByIsConfirmedFalse();
+        return PurchaseMapperService.toDtoList(purchases);
+    }
+
     public List<PurchaseDto> getPurchasesByPurchaser(Long purchaserId) {
         // Ensure purchaser exists and is not an admin; resolveService.resolveUser will throw if invalid
         resolveService.resolveUser(purchaserId);
