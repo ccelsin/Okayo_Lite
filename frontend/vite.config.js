@@ -5,14 +5,21 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
-    proxy: {
-      "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-        // si ton backend n'a pas le préfixe /api
-        rewrite: (path) => path.replace(/^\/api/, "")
-      }
-    }
-  }
+  host: true,         
+  port: 3000,
+  strictPort: true,
+  proxy: {
+    "/api": {
+      target: process.env.BACKEND_URL || "http://backend:8080",
+      changeOrigin: true,
+      
+      rewrite: (path) => path.replace(/^\/api/, ""),
+    },
+  },
+  watch: {
+    usePolling: true, // nécessaire sous Docker Desktop
+    interval: 100,
+  },
+}
+
 });
