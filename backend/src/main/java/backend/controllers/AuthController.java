@@ -42,7 +42,7 @@ public class AuthController {
     public ResponseEntity <?> register(@RequestBody RegisterDto authUserDto) {
         try {
             if (userRepository.findByUsername(authUserDto.username()) != null) {
-                return ResponseUtils.conflict("Username is already taken");
+                return ResponseUtils.conflict("Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre");
             }
             User user = new User();
             user.setUsername(authUserDto.username());

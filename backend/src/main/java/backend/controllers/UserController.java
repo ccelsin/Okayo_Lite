@@ -61,7 +61,7 @@ public class UserController {
             ResponseUtils.unauthorized("Invalid token");
         }
         userService.setProfile(userId, updatedUserDto);
-        return ResponseEntity.status(200).body("Profile updated. You have to login now");
+        return ResponseEntity.ok("Profile updated. You have to login now");
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -70,7 +70,7 @@ public class UserController {
         
         UserDto customer = userService.getUser(id);
         if (customer == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseUtils.notFound("User with id " + id + "doesn't exist");
         }
         return ResponseEntity.ok(customer);
     }
