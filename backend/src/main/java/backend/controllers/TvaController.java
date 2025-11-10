@@ -3,7 +3,6 @@ package backend.controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +31,7 @@ public class TvaController {
     @GetMapping
     public ResponseEntity<?> getAllTva(HttpServletRequest request) {
         if (userService.isAdmin(request) == false) {
-            return ResponseUtils.unauthorized("Access denied");
+            return ResponseUtils.forbidden("Vous n'êtes pas autorisé à effectuer cette action");
         }
         List<TvaDto> tvaList = tvaService.getAllTva();
         return ResponseEntity.ok(tvaList);
@@ -42,7 +41,7 @@ public class TvaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getTva(HttpServletRequest request,@PathVariable Long id) {
         if(userService.isAdmin(request) == false) {
-            return ResponseUtils.forbidden("Only admins can access TVA details.");
+            return ResponseUtils.forbidden("Vous n'êtes pas autorisé à effectuer cette action");
         }
         TvaDto tva = tvaService.getTva(id);
         return ResponseEntity.ok(tva);
@@ -52,7 +51,7 @@ public class TvaController {
     @PostMapping
     public ResponseEntity<?> saveTva(HttpServletRequest request, @RequestBody TvaDto tva) {
         if(userService.isAdmin(request) == false) {
-            return ResponseUtils.forbidden("Only admins can access TVA details.");
+            return ResponseUtils.forbidden("Vous n'êtes pas autorisé à effectuer cette action");
         }
         TvaDto savedTva = tvaService.saveTva(tva);
         return ResponseEntity.ok(savedTva);
@@ -62,7 +61,7 @@ public class TvaController {
     @PutMapping
     public ResponseEntity<?> setTva(HttpServletRequest request, @RequestBody TvaDto tvaDetails) {
         if (userService.isAdmin(request) == false) {
-            return ResponseUtils.unauthorized("Access denied");
+            return ResponseUtils.forbidden("Vous n'êtes pas autorisé à effectuer cette action");
         }
         TvaDto updatedTva = tvaService.setTva(tvaDetails);
         return ResponseEntity.ok(updatedTva);

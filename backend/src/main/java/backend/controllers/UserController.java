@@ -34,13 +34,13 @@ public class UserController {
     public ResponseEntity<?> getProfile(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (userService.isAuthorized(request) == false) {
-            return ResponseUtils.unauthorized("Missing or invalid Authorization header");
+            return ResponseUtils.unauthorized("Votre token est invalide");
         }
 
         String token = authHeader.substring(7);
         Long userId = userService.extractUserIdFromToken(token);
         if (userId == null) {
-            return ResponseUtils.unauthorized("Invalid token");
+            return ResponseUtils.unauthorized("Votre token est invalide");
         }
 
         var userDto = userService.getProfile(userId);
@@ -52,7 +52,7 @@ public class UserController {
     public ResponseEntity<?> updateProfile(HttpServletRequest request, @RequestBody UserDto updatedUserDto) {
         String authHeader = request.getHeader("Authorization");
         if (userService.isAuthorized(request) == false) {
-            return ResponseUtils.unauthorized("Missing or invalid Authorization header");
+            return ResponseUtils.unauthorized("Votre token est invalide");
         }
 
         String token = authHeader.substring(7);
@@ -70,7 +70,7 @@ public class UserController {
         
         UserDto customer = userService.getUser(id);
         if (customer == null) {
-            return ResponseUtils.notFound("User with id " + id + "doesn't exist");
+            return ResponseUtils.notFound("L'utilisateur demandé n'a pas été retrouvé");
         }
         return ResponseEntity.ok(customer);
     }
