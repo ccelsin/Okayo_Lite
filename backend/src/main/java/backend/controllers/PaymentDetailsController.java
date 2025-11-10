@@ -21,20 +21,49 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Contrôleur REST responsable de la gestion des informations de paiement
+ * ({@link backend.models.PaymentDetails}).
+ *
+ * <p>Ce contrôleur permet :</p>
+ * <ul>
+ *   <li>de créer des informations de paiement pour un utilisateur,</li>
+ *   <li>de consulter la liste des moyens de paiement existants,</li>
+ *   <li>d’afficher un moyen de paiement spécifique,</li>
+ *   <li>et de mettre à jour les informations de paiement existantes.</li>
+ * </ul>
+ *
+ * <p>Toutes les routes sont sécurisées via JWT, et certaines sont réservées
+ * aux administrateurs.</p>
+ *
+ * <p>Les réponses HTTP sont homogènes et gérées via la classe {@link ResponseUtils}.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payment-details")
 public class PaymentDetailsController {
 
+    /** Service métier gérant les opérations sur les moyens de paiement. */
     private final PaymentDetailsService paymentDetailsService;
+
+    /** Service permettant la vérification des rôles et des droits utilisateur. */
     private final UserService userService;
 
-    // Create payment details when the user has admin rights.
+    /**
+     * Crée de nouvelles informations de paiement pour l’utilisateur connecté.
+     *
+     * <p>Accessible uniquement aux administrateurs.  
+     * Si l’utilisateur connecté n’a pas les droits requis, une réponse HTTP 403 est renvoyée.</p>
+     *
+     * @param request la requête HTTP contenant le token JWT
+     * @param paymentDetailsRequest les données du moyen de paiement à enregistrer
+     * @return les informations de paiement enregistrées sous forme de {@link PaymentDetailsDto}
+     */
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<?> savePaymentDetails(HttpServletRequest request, @RequestBody PaymentDetailsRequest paymentDetailsRequest) {
         if (userService.isAdmin(request) == false) {
-            return ResponseUtils.forbidden("Only admins can create payment method details");
+            return ResponseUtils.forbidden("Seuls les administrateurs ont le droit de créer des informations de paiement");
         }
 
         Long userId = userService.extractUserIdFromRequest(request);
@@ -42,40 +71,65 @@ public class PaymentDetailsController {
         return ResponseEntity.ok(savedPaymentDetails);
     }
 
-    // List every payment details entry for an authorized user.
+    /**
+     * Récupère la liste de toutes les informations de paiement enregistrées.
+     *
+     * <p>Accessible à tout utilisateur authentifié disposant d’un token JWT valide.
+     * Si le token est absent ou invalide, une réponse HTTP 401 est renvoyée.</p>
+     *
+     * @param request la requête HTTP contenant le token JWT
+     * @return une liste de {@link PaymentDetailsDto}
+     */
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     public ResponseEntity<?> getAllPaymentDetails(HttpServletRequest request) {
         if (userService.isAuthorized(request) == false) {
-            return ResponseUtils.unauthorized("Access denied");
+            return ResponseUtils.unauthorized("Accès non autorisé");
         }
         List<PaymentDetailsDto> paymentDetails = paymentDetailsService.getAllPaymentDetails();
         return ResponseEntity.ok(paymentDetails);
     }
 
-    // Load one payment details entry by its identifier.
+    /**
+     * Récupère les détails d’un moyen de paiement spécifique à partir de son identifiant.
+     *
+     * <p>Si aucun enregistrement correspondant n’est trouvé, une réponse HTTP 401 est renvoyée.</p>
+     *
+     * @param id l’identifiant du moyen de paiement
+     * @return les détails du moyen de paiement sous forme de {@link PaymentDetailsDto}
+     * @throws Exception si la requête est invalide ou les données corrompues
+     */
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPaymentDetails(@PathVariable Long id) {
+    public ResponseEntity<?> getPaymentDetails(@PathVariable Long id) throws Exception {
         PaymentDetailsDto paymentDetails = paymentDetailsService.getPaymentDetails(id);
         if (paymentDetails == null) {
-            return ResponseUtils.unauthorized("Access denied");
+            return ResponseUtils.unauthorized("Accès non autorisé");
         }
         return ResponseEntity.ok(paymentDetails);
     }
 
-    // Update payment details when the user has admin rights.
+    /**
+     * Met à jour les informations de paiement existantes.
+     *
+     * <p>Accessible uniquement aux administrateurs.
+     * Si l’utilisateur n’a pas les droits suffisants, une erreur HTTP 403 est renvoyée.</p>
+     *
+     * @param request la requête HTTP contenant le token JWT
+     * @param paymentDetailsDto les nouvelles données du moyen de paiement
+     * @return les informations mises à jour ou une erreur si elles sont introuvables
+     */
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping
     public ResponseEntity<?> setPaymentDetails(HttpServletRequest request, @RequestBody PaymentDetailsDto paymentDetailsDto) {
         if (userService.isAdmin(request) == false) {
-            return ResponseUtils.forbidden("Access denied");
+            return ResponseUtils.forbidden("Seuls les administrateurs peuvent modifier des informations de paiement");
         }
 
         Long userId = userService.extractUserIdFromRequest(request);
         PaymentDetailsDto updatedPaymentDetails = paymentDetailsService.setPaymentDetails(userId, paymentDetailsDto);
         if (updatedPaymentDetails == null) {
-            return ResponseUtils.badRequest("These payment details do not exist");
+            return ResponseUtils.badRequest("Ces informations de paiement n'existent pas");
         }
         return ResponseEntity.ok(updatedPaymentDetails);
     }
