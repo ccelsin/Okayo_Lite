@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       setError(null);
       await login(values);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError("Identifiants invalides");
     }

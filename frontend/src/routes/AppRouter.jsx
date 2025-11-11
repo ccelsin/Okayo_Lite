@@ -25,9 +25,7 @@ export default function AppRouter() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
+              <LandingPage />
           }
         />
         <Route
@@ -113,9 +111,10 @@ export default function AppRouter() {
                   </ProtectedRoute>} />
         
         <Route 
-          path="/accueil" 
-          element={
-                    <LandingPage />
+          path="/dashboard" 
+          element={<ProtectedRoute>
+                    <DashboardPage />
+                    </ProtectedRoute>
                   } />
         
         
