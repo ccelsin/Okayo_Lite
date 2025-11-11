@@ -10,7 +10,7 @@ export default function Topbar() {
 
   function handleLogout() {
     logout();
-    navigate("/accueil");
+    navigate("/");
   }
 
   const isAdmin = user?.role === "ADMIN";
