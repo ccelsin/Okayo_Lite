@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   function handleLogout() {
     logout();
-    navigate("/accueil");
+    navigate("/");
   }
 
   async function onSubmit(values) {

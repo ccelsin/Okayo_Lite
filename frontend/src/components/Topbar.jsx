@@ -22,7 +22,7 @@ export default function Topbar() {
         <div className="flex h-16 justify-between items-center">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 py-1 -ml-2">
+            <Link to="/dashboard" className="flex items-center gap-2 py-1 -ml-2">
               <img
                 src={logo}
                 alt="Okayo Lite"
