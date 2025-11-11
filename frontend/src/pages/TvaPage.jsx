@@ -73,7 +73,7 @@ export default function TvaPage() {
       Swal.fire({ icon: "success", title: "Taux créé", timer: 1800, showConfirmButton: false });
       setMode("list");
     } catch (e) {
-      const msg = e?.message || "Erreur lors de la création";
+      const msg = e?.data.message || "Erreur lors de la création";
       Swal.fire({ icon: "error", title: "Échec", text: msg });
     }
   }
@@ -97,7 +97,7 @@ export default function TvaPage() {
       setSelectedId(null);
       reset();
     } catch (e) {
-      const msg = e?.message || "Erreur lors de la modification";
+      const msg = e?.data.message || "Erreur lors de la modification";
       Swal.fire({ icon: "error", title: "Échec", text: msg });
     }
   }

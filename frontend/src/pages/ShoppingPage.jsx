@@ -43,7 +43,7 @@ export default function ShoppingPage() {
       // Si tu veux rafraîchir la liste (pas nécessaire ici)
       // await refresh();
     } catch (e) {
-      const apiMsg = e?.response?.data?.message || e?.message || "Impossible de créer l'achat";
+      const apiMsg = e?.response?.data?.message || e?.data.message || "Impossible de créer l'achat";
       Swal.fire({ icon: "error", title: "Échec de l'achat", text: apiMsg });
     } finally {
       setSubmittingId(null);

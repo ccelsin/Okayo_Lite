@@ -46,7 +46,7 @@ export default function PaymentDetailsPage() {
 
   function handleApiError(e, fallbackTitle = "Erreur", fallbackText = "Une erreur est survenue") {
     const status = e?.response?.status ?? e?.status;
-    const apiMsg = e?.response?.data?.message || e?.message;
+    const apiMsg = e?.response?.data?.message || e?.data.message;
     if (status === 401 || status === 403) {
       Swal.fire({ icon: "error", title: "Accès refusé", text: "Vous n'avez pas les droits pour cette action." });
       return;
@@ -62,7 +62,7 @@ export default function PaymentDetailsPage() {
       setMode("list");
       Swal.fire({ icon: "success", title: "Détails créés", timer: 1700, showConfirmButton: false });
     } catch (e) {
-      handleApiError(e, "Échec de la création", "Impossible de créer les détails de paiement");
+      handleApiError(e, "Échec de la création");
     }
   }
 
@@ -84,7 +84,7 @@ export default function PaymentDetailsPage() {
       reset({ paymentTerm: "TOTAL_HT" });
       Swal.fire({ icon: "success", title: "Détails modifiés", timer: 1500, showConfirmButton: false });
     } catch (e) {
-      handleApiError(e, "Échec de la modification", "Impossible de modifier ces détails");
+      handleApiError(e, "Échec de la modification");
     }
   }
 
@@ -310,7 +310,7 @@ export default function PaymentDetailsPage() {
                               Swal.fire({
                                 icon: "info",
                                 title: "Modification indisponible",
-                                text: "updatePaymentDetails n'est pas exposée.",
+                                text: "Veuillez réessayer plus tard",
                               });
                             }
                           }}
@@ -344,7 +344,7 @@ export default function PaymentDetailsPage() {
                               Swal.fire({
                                 icon: "info",
                                 title: "Modification indisponible",
-                                text: "updatePaymentDetails n'est pas exposée.",
+                                text: "Veuillez réessayer plus tard.",
                               });
                             }
                           }}
@@ -436,7 +436,7 @@ export default function PaymentDetailsPage() {
                                     Swal.fire({
                                       icon: "info",
                                       title: "Modification indisponible",
-                                      text: "updatePaymentDetails n'est pas exposée.",
+                                      text: "Veuillez réessayer plus tard.",
                                     });
                                   }
                                 }}
