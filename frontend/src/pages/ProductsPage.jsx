@@ -41,7 +41,7 @@ export default function ProductsPage() {
 
   function handleApiError(e, fallbackTitle = "Erreur", fallbackText = "Une erreur est survenue") {
     const status = e?.response?.status ?? e?.status;
-    const apiMsg = e?.response?.data?.message || e?.message;
+    const apiMsg = e?.response?.data?.message || e?.data.message;
     if (status === 401 || status === 403) {
       Swal.fire({ icon: "error", title: "Accès refusé", text: "Vous n'avez pas les droits pour cette action." });
       return;
@@ -63,14 +63,14 @@ export default function ProductsPage() {
       setMode("list");
       Swal.fire({ icon: "success", title: "Produit créé", timer: 1700, showConfirmButton: false });
     } catch (e) {
-      handleApiError(e, "Échec de la création", "Impossible de créer le produit");
+      handleApiError(e, "Échec de la création");
     }
   }
 
   async function onSubmitEdit(values) {
     if (!selectedId) return;
     if (!canEdit) {
-      Swal.fire({ icon: "info", title: "Modification indisponible", text: "updateProduct n'est pas exportée par ../api/products." });
+      Swal.fire({ icon: "info", title: "Modification indisponible", text: e.data.message });
       return;
     }
     try {
@@ -87,7 +87,7 @@ export default function ProductsPage() {
       reset();
       Swal.fire({ icon: "success", title: "Produit modifié", timer: 1500, showConfirmButton: false });
     } catch (e) {
-      handleApiError(e, "Échec de la modification", "Impossible de modifier le produit");
+      handleApiError(e, "Échec de la modification");
     }
   }
 
@@ -251,7 +251,7 @@ export default function ProductsPage() {
                             if (canEdit) {
                               setMode("edit");
                             } else {
-                              Swal.fire({ icon: "info", title: "Modification indisponible", text: "updateProduct n'est pas exposée." });
+                              Swal.fire({ icon: "info", title: "Modification indisponible", text: e.data.message });
                             }
                           }}
                         >
@@ -281,7 +281,7 @@ export default function ProductsPage() {
                             if (canEdit) {
                               setMode("edit");
                             } else {
-                              Swal.fire({ icon: "info", title: "Modification indisponible", text: "updateProduct n'est pas exposée." });
+                              Swal.fire({ icon: "info", title: "Modification indisponible", text: e.data.message });
                             }
                           }}
                         >
@@ -331,7 +331,7 @@ export default function ProductsPage() {
                                   if (canEdit) {
                                     setMode("edit");
                                   } else {
-                                    Swal.fire({ icon: "info", title: "Modification indisponible", text: "updateProduct n'est pas exposée." });
+                                    Swal.fire({ icon: "info", title: "Modification indisponible", text: e.data.message });
                                   }
                                 }}
                               >

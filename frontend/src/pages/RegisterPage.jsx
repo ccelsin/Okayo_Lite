@@ -33,7 +33,7 @@ export default function RegisterPage() {
       setSuccess("Compte créé avec succès. Vous pouvez maintenant vous connecter.");
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setError("Impossible de créer le compte. Veuillez réessayer.");
+      setError(err.response.data.message);
     }
   }
 

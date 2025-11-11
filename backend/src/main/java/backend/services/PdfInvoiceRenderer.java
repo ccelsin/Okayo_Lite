@@ -19,10 +19,21 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service responsable du rendu PDF d'une facture via un HTML embarqué rendu
+ * par la librairie OpenHTMLtoPDF (renderer PDFBox).
+ *
+ * <p>La génération s'appuie sur un gabarit HTML/CSS construit dynamiquement
+ * et sur des totaux calculés par {@link InvoiceService}.</p>
+ *
+ * <p>Annoté avec {@link Service} pour la gestion Spring et {@link RequiredArgsConstructor}
+ * pour l'injection par constructeur.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class PdfInvoiceRenderer {
 
+    /** Service métier des factures, utilisé pour calculer les totaux (HT/TTC). */
     private final InvoiceService invoiceService;
 
     /** Génère la page 1 en PDF (bytes) à partir d'une Invoice. */
@@ -56,6 +67,15 @@ public class PdfInvoiceRenderer {
     // HTML
     // ---------------------------------------------------------------------
 
+    /**
+     * Construit le HTML complet de la facture à partir des données fournies.
+     *
+     * @param invoice facture source
+     * @param totalHT total hors taxe
+     * @param totalTTC total TTC
+     * @param totalTvaByRate mapping taux TVA → total TVA correspondant
+     * @return chaîne HTML prête à être rendue en PDF
+     */
     private String buildHtml(Invoice invoice,
                              BigDecimal totalHT,
                              BigDecimal totalTTC,
@@ -199,6 +219,13 @@ public class PdfInvoiceRenderer {
     // Densité (compacte si beaucoup de lignes)
     // ---------------------------------------------------------------------
 
+    /**
+     * Retourne une classe CSS de densité selon le nombre de lignes d'achats,
+     * pour compacter l'affichage si nécessaire.
+     *
+     * @param list liste des achats
+     * @return "", "dense" ou "ultra"
+     */
     private String densityClass(List<Purchase> list) {
         int n = (list == null) ? 0 : list.size();
         if (n >= 28) return "ultra";   // police ~10px, padding 1.5mm
@@ -210,6 +237,12 @@ public class PdfInvoiceRenderer {
     // Blocks
     // ---------------------------------------------------------------------
 
+    /**
+     * Construit le bloc HTML d'adresse de l'émetteur.
+     *
+     * @param emitter utilisateur émetteur (peut être null)
+     * @return HTML du bloc émetteur
+     */
     private String buildEmitterBlock(User emitter) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"box\">");
@@ -225,6 +258,12 @@ public class PdfInvoiceRenderer {
         return sb.toString();
     }
 
+    /**
+     * Construit le bloc HTML d'adresse du client.
+     *
+     * @param customer utilisateur client (peut être null)
+     * @return HTML du bloc client
+     */
     private String buildCustomerBlock(User customer) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"box\">");
@@ -242,6 +281,12 @@ public class PdfInvoiceRenderer {
         return sb.toString();
     }
 
+    /**
+     * Construit les lignes du tableau d'achats.
+     *
+     * @param purchases liste d'achats (peut être vide ou null)
+     * @return HTML des lignes &lt;tr&gt;…&lt;/tr&gt;
+     */
     private String buildRows(List<Purchase> purchases) {
         if (purchases == null || purchases.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
@@ -304,6 +349,12 @@ public class PdfInvoiceRenderer {
         return sb.toString();
     }
 
+    /**
+     * Retourne un libellé lisible pour le terme de paiement du {@link PaymentDetails}.
+     *
+     * @param pd détails de paiement (peut être null)
+     * @return libellé humanisé ou "-" si indisponible
+     */
     private String paymentTermLabel(PaymentDetails pd) {
         if (pd == null || pd.getPaymentTerm() == null) return "-";
         return humanizeEnum(pd.getPaymentTerm().name());
@@ -313,13 +364,20 @@ public class PdfInvoiceRenderer {
     // Utils
     // ---------------------------------------------------------------------
 
+    /** Null-value helper : retourne ZERO si null. */
     private static BigDecimal nv(BigDecimal v) { return v != null ? v : BigDecimal.ZERO; }
 
+    /**
+     * Formatte une date en {@code dd/MM/yyyy} (ou "-" si null).
+     */
     private String fmtDate(Date d) {
         if (d == null) return "-";
         return new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE).format(d);
     }
 
+    /**
+     * Formatte un montant monétaire selon la locale FR avec 2 décimales.
+     */
     private String fmtMoney(BigDecimal v) {
         v = nv(v).setScale(2, RoundingMode.HALF_UP);
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRANCE);
@@ -328,35 +386,57 @@ public class PdfInvoiceRenderer {
         return nf.format(v);
     }
 
+    /**
+     * Formatte un taux (ex. 20.00 → "20").
+     */
     private String fmtRate(BigDecimal rate) {
         if (rate == null) return "-";
         return rate.stripTrailingZeros().toPlainString();
     }
 
+    /**
+     * Formatte une quantité (stripTrailingZeros).
+     */
     private String fmtQty(BigDecimal q) {
         if (q == null) return "-";
         return q.stripTrailingZeros().toPlainString();
     }
 
+    /**
+     * Retourne "-" si la chaîne est vide ou null.
+     */
     private String safe(String s) { return (s == null || s.isBlank()) ? "-" : s; }
 
+    /** Teste si une chaîne est non vide. */
     private boolean notBlank(String s) { return s != null && !s.isBlank(); }
 
+    /**
+     * Retourne une ligne &lt;div&gt;…&lt;/div&gt; si la valeur n'est pas vide.
+     */
     private String lineIfNotBlank(String s) {
         if (s == null || s.isBlank()) return "";
         return "<div>" + escapeHtml(s) + "</div>";
     }
 
+    /**
+     * Variante avec préfixe (ex. "Tél.: ").
+     */
     private String lineIfNotBlank(String s, String prefix) {
         if (s == null || s.isBlank()) return "";
         return "<div>" + escapeHtml(prefix + s) + "</div>";
     }
 
+    /**
+     * Joint les fragments non vides séparés par un espace et les renvoie sur une ligne.
+     */
     private String joinIfAny(List<String> parts) {
         String joined = parts.stream().filter(p -> p != null && !p.isBlank()).collect(Collectors.joining(" "));
         return lineIfNotBlank(joined);
     }
 
+    /**
+     * Concatène deux fragments non vides en les séparant par un espace si besoin.
+     */
     private String concatNonEmpty(String a, String b) {
         if ((a == null || a.isBlank()) && (b == null || b.isBlank())) return "";
         if (a == null || a.isBlank()) return b;
@@ -364,11 +444,17 @@ public class PdfInvoiceRenderer {
         return a + " " + b;
     }
 
+    /**
+     * Retourne un nom affichable pour l'utilisateur (username sinon "-").
+     */
     private String nameOrUsername(User u) {
         if (u == null) return "-";
         return safe(u.getUsername());
     }
 
+    /**
+     * Transforme un nom d'énumération en libellé lisible (snake_case → "Snake case").
+     */
     private String humanizeEnum(String name) {
         if (name == null) return "-";
         String s = name.replace('_', ' ').toLowerCase(Locale.ROOT);
